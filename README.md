@@ -1,0 +1,1 @@
+- [Sample installation script for an application](https://nsis.sourceforge.io/Sample_installation_script_for_an_application)
