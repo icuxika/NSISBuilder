@@ -1,22 +1,30 @@
 Unicode True
 ManifestDPIAware true
 
+!define MULTIUSER_EXECUTIONLEVEL Highest
+!define MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER
+!define MULTIUSER_MUI
+!define MULTIUSER_INSTALLMODE_INSTDIR "$(^Name)"
+!define MULTIUSER_USE_PROGRAMFILES64
+!define MULTIUSER_INSTALLMODE_COMMANDLINE
+
+!include MultiUser.nsh
 !include MUI2.nsh
 
-!define APPLICATION_SOURCE "SourceDir"
-
+;-------------------------------- 
+; Product info
+!define PRODUCT_RESOURCE "SourceDir"
 !define PRODUCT_NAME "NSISBuilder"
 !define PRODUCT_FILE "ComposeMultiplatformProject"
 
 NAME "${PRODUCT_NAME}"
 OutFile "Install ${PRODUCT_NAME}.exe"
 
-RequestExecutionLevel user
-
-InstallDir ""
+;RequestExecutionLevel user
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "License.rtf"
+!insertmacro MULTIUSER_PAGE_INSTALLMODE
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -30,21 +38,12 @@ InstallDir ""
 !insertmacro MUI_LANGUAGE "SimpChinese"
 
 
-
 Function .onInit
-  SetShellVarContext Current
-
-  ${If} $INSTDIR == "" ; No /D= nor InstallDirRegKey?
-    GetKnownFolderPath $INSTDIR ${FOLDERID_UserProgramFiles} ; This folder only exists on Win7+
-    StrCmp $INSTDIR "" 0 +2 
-    StrCpy $INSTDIR "$LocalAppData\Programs" ; Fallback directory
-
-    StrCpy $INSTDIR "$INSTDIR\$(^Name)"
-  ${EndIf}
+  !insertmacro MULTIUSER_INIT
 FunctionEnd
 
 Function un.onInit
-  SetShellVarContext Current
+  !insertmacro MULTIUSER_UNINIT
 FunctionEnd
 
 ;-------------------------------- 
@@ -52,7 +51,7 @@ FunctionEnd
 
 Section "MainSection" 
     SetOutPath $INSTDIR
-    File /r "${APPLICATION_SOURCE}\*.*"
+    File /r "${PRODUCT_RESOURCE}\*.*"
 
     ;create desktop shortcut
     CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_FILE}.exe" ""
