@@ -49,6 +49,8 @@ InstallDir ""
 !insertmacro MUI_LANGUAGE "SimpChinese"
 !insertmacro MUI_LANGUAGE "English"
 
+!include "languages\SimpChinese.nsh"
+!include "languages\English.nsh"
 
 Function .onInit
   !insertmacro MUI_LANGDLL_DISPLAY
@@ -105,9 +107,9 @@ SectionEnd
 ;MessageBox Section
 
 Function .onInstSuccess
-  MessageBox MB_OK "You have successfully installed ${PRODUCT_NAME}. Use the desktop icon to start the program."
+  MessageBox MB_OK "$(alreadyInstalled)"
 FunctionEnd
  
 Function un.onUninstSuccess
-  MessageBox MB_OK "You have successfully uninstalled ${PRODUCT_NAME}."
+  MessageBox MB_OK "$(alreadyUninstalled)"
 FunctionEnd
