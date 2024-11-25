@@ -1,16 +1,6 @@
 Unicode True
 ManifestDPIAware true
 
-!define MULTIUSER_EXECUTIONLEVEL Highest
-!define MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER
-!define MULTIUSER_MUI
-!define MULTIUSER_INSTALLMODE_INSTDIR "$(^Name)"
-!define MULTIUSER_USE_PROGRAMFILES64
-!define MULTIUSER_INSTALLMODE_COMMANDLINE
-
-!include MultiUser.nsh
-!include MUI2.nsh
-
 ;-------------------------------- 
 ; Product info
 !define PRODUCT_RESOURCE "SourceDir"
@@ -20,7 +10,28 @@ ManifestDPIAware true
 NAME "${PRODUCT_NAME}"
 OutFile "Install ${PRODUCT_NAME}.exe"
 
+;-------------------------------- 
+!define UNINSTKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
+!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_KEY "${UNINSTKEY}"
+!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_VALUENAME "CurrentUser"
+!define MULTIUSER_EXECUTIONLEVEL Highest
+!define MULTIUSER_MUI
+!define MULTIUSER_INSTALLMODE_INSTDIR "$(^Name)"
+!define MULTIUSER_USE_PROGRAMFILES64
+!define MULTIUSER_INSTALLMODE_COMMANDLINE
+
+;--------------------------------
+;Language Selection Dialog Settings
+!define MUI_LANGDLL_ALWAYSSHOW
+!define MUI_LANGDLL_REGISTRY_ROOT "HKCU" 
+!define MUI_LANGDLL_REGISTRY_KEY "Software\${PRODUCT_NAME}" 
+!define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
+
+!include MultiUser.nsh
+!include MUI2.nsh
+
 ;RequestExecutionLevel user
+InstallDir ""
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "License.rtf"
@@ -36,13 +47,16 @@ OutFile "Install ${PRODUCT_NAME}.exe"
 !insertmacro MUI_UNPAGE_FINISH
 
 !insertmacro MUI_LANGUAGE "SimpChinese"
+!insertmacro MUI_LANGUAGE "English"
 
 
 Function .onInit
+  !insertmacro MUI_LANGDLL_DISPLAY
   !insertmacro MULTIUSER_INIT
 FunctionEnd
 
 Function un.onInit
+  !insertmacro MUI_UNGETLANGUAGE
   !insertmacro MULTIUSER_UNINIT
 FunctionEnd
 
@@ -50,22 +64,22 @@ FunctionEnd
 ;Installer Sections     
 
 Section "MainSection" 
-    SetOutPath $INSTDIR
-    File /r "${PRODUCT_RESOURCE}\*.*"
+  SetOutPath $INSTDIR
+  File /r "${PRODUCT_RESOURCE}\*.*"
 
-    ;create desktop shortcut
-    CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_FILE}.exe" ""
- 
-    ;create start-menu items
-    CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
-    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\Uninstall.exe" 0
-    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_FILE}.exe" "" "$INSTDIR\${PRODUCT_FILE}.exe" 0
- 
-    ;write uninstall information to the registry
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayName" "${PRODUCT_NAME} (remove only)"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "UninstallString" "$INSTDIR\Uninstall.exe"
- 
-    WriteUninstaller "$INSTDIR\Uninstall.exe"
+  ;create desktop shortcut
+  CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_FILE}.exe" ""
+
+  ;create start-menu items
+  CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\Uninstall.exe" 0
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_FILE}.exe" "" "$INSTDIR\${PRODUCT_FILE}.exe" 0
+
+  ;write uninstall information to the registry
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
+  WriteRegStr ShCtx "${UNINSTKEY}" DisplayName "$(^Name)"
+  WriteRegStr ShCtx "${UNINSTKEY}" UninstallString '"$INSTDIR\Uninstall.exe"'
+  WriteRegStr ShCtx "${UNINSTKEY}" $MultiUser.InstallMode 1
 SectionEnd
 
 ;--------------------------------    
@@ -84,9 +98,7 @@ Section "Uninstall"
   RmDir  "$SMPROGRAMS\${PRODUCT_NAME}"
  
 ;Delete Uninstaller And Unistall Registry Entries
-  DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_NAME}"
-  DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"  
- 
+  DeleteRegKey ShCtx "${UNINSTKEY}"
 SectionEnd
 
 ;--------------------------------    
