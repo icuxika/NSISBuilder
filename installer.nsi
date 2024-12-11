@@ -6,6 +6,7 @@ ManifestDPIAware true
 !define PRODUCT_RESOURCE "SourceDir"
 !define PRODUCT_NAME "NSISBuilder"
 !define PRODUCT_FILE "ComposeMultiplatformProject"
+!define PRODUCT_URI_SCHEME "NSISBuilder"
 
 NAME "${PRODUCT_NAME}"
 OutFile "Install ${PRODUCT_NAME}.exe"
@@ -77,6 +78,7 @@ Section "MainSection"
   SetOutPath $INSTDIR
   File /r "${PRODUCT_RESOURCE}\*.*"
   File readme.txt
+  File index.html
 
   ;create desktop shortcut
   CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_FILE}.exe" ""
@@ -85,31 +87,44 @@ Section "MainSection"
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\Uninstall.exe" 0
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_FILE}.exe" "" "$INSTDIR\${PRODUCT_FILE}.exe" 0
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Call ${PRODUCT_NAME}.lnk" "$INSTDIR\index.html"
 
   ;write uninstall information to the registry
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   WriteRegStr ShCtx "${UNINSTKEY}" DisplayName "$(^Name)"
   WriteRegStr ShCtx "${UNINSTKEY}" UninstallString '"$INSTDIR\Uninstall.exe"'
   WriteRegStr ShCtx "${UNINSTKEY}" $MultiUser.InstallMode 1
+
+  ;registering the application handling the custom uri scheme
+  DeleteRegKey HKCR "${PRODUCT_URI_SCHEME}"
+  WriteRegStr HKCR "${PRODUCT_URI_SCHEME}" "" "URL:${PRODUCT_NAME} Protocol"
+  WriteRegStr HKCR "${PRODUCT_URI_SCHEME}" "URL Protocol" ""
+  WriteRegStr HKCR "${PRODUCT_URI_SCHEME}\DefaultIcon" "" "$INSTDIR\${PRODUCT_FILE}.exe"
+  WriteRegStr HKCR "${PRODUCT_URI_SCHEME}\shell" "" ""
+  WriteRegStr HKCR "${PRODUCT_URI_SCHEME}\shell\open" "" ""
+  WriteRegStr HKCR "${PRODUCT_URI_SCHEME}\shell\open\command" "" "$INSTDIR\${PRODUCT_FILE}.exe %1"
 SectionEnd
 
 ;--------------------------------    
 ;Uninstaller Section  
 Section "Uninstall"
  
-;Delete Files 
+  ;Delete Files 
   RMDir /r "$INSTDIR\*.*"    
  
-;Remove the installation directory
+  ;Remove the installation directory
   RMDir "$INSTDIR"
  
-;Delete Start Menu Shortcuts
+  ;Delete Start Menu Shortcuts
   Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\*.*"
   RmDir  "$SMPROGRAMS\${PRODUCT_NAME}"
  
-;Delete Uninstaller And Unistall Registry Entries
+  ;Delete Uninstaller And Unistall Registry Entries
   DeleteRegKey ShCtx "${UNINSTKEY}"
+
+  ;Delete the Custom URI Scheme
+  DeleteRegKey HKCR "${PRODUCT_URI_SCHEME}"
 SectionEnd
 
 ;--------------------------------    
