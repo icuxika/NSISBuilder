@@ -44,10 +44,11 @@ InstallDir ""
     !define MUI_FINISHPAGE_NOAUTOCLOSE
     !define MUI_FINISHPAGE_RUN
     !define MUI_FINISHPAGE_RUN_NOTCHECKED
-    !define MUI_FINISHPAGE_RUN_TEXT "立即运行 ${PRODUCT_NAME}"
     !define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
-    !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
     !define MUI_FINISHPAGE_SHOWREADME $INSTDIR\readme.txt
+    !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+    !define MUI_FINISHPAGE_LINK "https://www.aprillie.com/cache/"
+    !define MUI_FINISHPAGE_LINK_LOCATION "https://www.aprillie.com/cache/"
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_WELCOME
