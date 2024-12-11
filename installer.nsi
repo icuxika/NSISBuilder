@@ -39,6 +39,14 @@ InstallDir ""
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
+
+    !define MUI_FINISHPAGE_NOAUTOCLOSE
+    !define MUI_FINISHPAGE_RUN
+    !define MUI_FINISHPAGE_RUN_NOTCHECKED
+    !define MUI_FINISHPAGE_RUN_TEXT "立即运行 ${PRODUCT_NAME}"
+    !define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
+    !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+    !define MUI_FINISHPAGE_SHOWREADME $INSTDIR\readme.txt
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_UNPAGE_WELCOME
@@ -68,6 +76,7 @@ FunctionEnd
 Section "MainSection" 
   SetOutPath $INSTDIR
   File /r "${PRODUCT_RESOURCE}\*.*"
+  File readme.txt
 
   ;create desktop shortcut
   CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_FILE}.exe" ""
@@ -112,4 +121,8 @@ FunctionEnd
  
 Function un.onUninstSuccess
   MessageBox MB_OK "$(alreadyUninstalled)"
+FunctionEnd
+
+Function LaunchLink
+  ExecShell "" "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
 FunctionEnd
