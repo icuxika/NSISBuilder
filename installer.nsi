@@ -67,6 +67,8 @@ InstallDir ""
 Function .onInit
   !insertmacro MUI_LANGDLL_DISPLAY
   !insertmacro MULTIUSER_INIT
+  File "/oname=$PluginsDir\License-SimpChinese.txt" "licenses\License-SimpChinese.txt"
+  File "/oname=$PluginsDir\License-English.txt" "licenses\License-English.txt"
 FunctionEnd
 
 Function un.onInit
@@ -152,11 +154,11 @@ Function addLicense
 
   ${If} $LANGUAGE == "2052"
     ;current language is SimpChinese
-    FileOpen $0 "$EXEDIR\licenses\License-SimpChinese.txt" r
+    FileOpen $0 "$PluginsDir\License-SimpChinese.txt" r
     IfErrors exit
   ${Else}
     ;current language is English
-    FileOpen $0 "$EXEDIR\licenses\License-English.txt" r
+    FileOpen $0 "$PluginsDir\License-English.txt" r
     IfErrors exit
   ${EndIf}
   ;$R0 is the file content 
