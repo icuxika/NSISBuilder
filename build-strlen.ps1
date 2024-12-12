@@ -1,1 +1,1 @@
-& 'C:\CommandLineTools\nsis-3.10\makensis.exe' /INPUTCHARSET UTF8 .\installer.nsi
+& 'C:\CommandLineTools\SourceInstall\nsis\makensis.exe' /INPUTCHARSET UTF8 .\installer.nsi
