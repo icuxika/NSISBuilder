@@ -17,6 +17,8 @@ scons NSIS_MAX_STRLEN=8192 PREFIX=C:\CommandLineTools\SourceInstall\nsis ZLIB_W3
 ```
 编译完成后构建结果覆盖到`NSIS`安装目录（`nsis-3.10.zip`解压目录或`nsis-3.10-setup.exe`安装目录）同名文件
 
+> 完全构建可以参考x64构建步骤
+
 ## x64
 > [Zlib-1.2.8-win64-AMD64.zip](https://nsis.sourceforge.io/mediawiki/images/b/bb/Zlib-1.2.8-win64-AMD64.zip)
 
@@ -48,4 +50,6 @@ files = Split("""
 ```
 scons NSIS_MAX_STRLEN=8192 PREFIX=C:\CommandLineTools\SourceInstall\nsis ZLIB_W32="C:\CommandLineTools\Zlib-1.2.8-win64-AMD64" TARGET_ARCH=amd64 install
 ```
+
+`NSIS_MAX_STRLEN`若设置更大的值，编译成功也无法使用。
 
