@@ -178,7 +178,7 @@ Function addLicense
 
   FindWindow $0 "#32770" "" $HWNDPARENT
   GetDlgItem $0 $0 1000
-  SendMessage $0 ${EM_SETLIMITTEXT} $R2 0
+  SendMessage $0 ${EM_SETLIMITTEXT} 0 0
   SendMessage $0 ${WM_SETTEXT} 0 "STR:$R0"
 exit:
  
