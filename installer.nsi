@@ -28,6 +28,8 @@ OutFile "Install ${PRODUCT_NAME}.exe"
 !define MUI_LANGDLL_REGISTRY_KEY "Software\${PRODUCT_NAME}" 
 !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
 
+!define MUI_CUSTOMFUNCTION_GUIINIT myGuiInit
+
 !include MultiUser.nsh
 !include MUI2.nsh
 !include LogicLib.nsh
@@ -64,11 +66,65 @@ InstallDir ""
 !include "languages\SimpChinese.nsh"
 !include "languages\English.nsh"
 
+!macro UninstallExisting exitcode uninstcommand
+Push `${uninstcommand}`
+Call UninstallExisting
+Pop ${exitcode}
+!macroend
+Function UninstallExisting
+Exch $1 ; uninstcommand
+Push $2 ; Uninstaller
+Push $3 ; Len
+StrCpy $3 ""
+StrCpy $2 $1 1
+StrCmp $2 '"' qloop sloop
+sloop:
+	StrCpy $2 $1 1 $3
+	IntOp $3 $3 + 1
+	StrCmp $2 "" +2
+	StrCmp $2 ' ' 0 sloop
+	IntOp $3 $3 - 1
+	Goto run
+qloop:
+	StrCmp $3 "" 0 +2
+	StrCpy $1 $1 "" 1 ; Remove initial quote
+	IntOp $3 $3 + 1
+	StrCpy $2 $1 1 $3
+	StrCmp $2 "" +2
+	StrCmp $2 '"' 0 qloop
+run:
+	StrCpy $2 $1 $3 ; Path to uninstaller
+	StrCpy $1 161 ; ERROR_BAD_PATHNAME
+	GetFullPathName $3 "$2\.." ; $InstDir
+	IfFileExists "$2" 0 +4
+	ExecWait '"$2" /S _?=$3' $1 ; This assumes the existing uninstaller is a NSIS uninstaller, other uninstallers don't support /S nor _?=
+	IntCmp $1 0 "" +2 +2 ; Don't delete the installer if it was aborted
+	Delete "$2" ; Delete the uninstaller
+	RMDir "$3" ; Try to delete $InstDir
+	RMDir "$3\.." ; (Optional) Try to delete the parent of $InstDir
+Pop $3
+Pop $2
+Exch $1 ; exitcode
+FunctionEnd
+
 Function .onInit
   !insertmacro MUI_LANGDLL_DISPLAY
   !insertmacro MULTIUSER_INIT
+
   File "/oname=$PluginsDir\License-SimpChinese.txt" "licenses\License-SimpChinese.txt"
   File "/oname=$PluginsDir\License-English.txt" "licenses\License-English.txt"
+FunctionEnd
+
+Function myGUIInit
+  ReadRegStr $0 ShCtx "${UNINSTKEY}" "UninstallString"
+  ${If} $0 != ""
+  ${AndIf} ${Cmd} `MessageBox MB_YESNO|MB_ICONQUESTION "$(uninstallPreviousVersion)" /SD IDYES IDYES`
+    !insertmacro UninstallExisting $0 $0
+    ${If} $0 <> 0
+      MessageBox MB_YESNO|MB_ICONSTOP "$(failedToUninstallPreviousVersion)" /SD IDYES IDYES +2
+        Abort
+    ${EndIf}
+  ${EndIf}
 FunctionEnd
 
 Function un.onInit
