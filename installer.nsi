@@ -30,11 +30,13 @@ OutFile "Install ${PRODUCT_NAME}.exe"
 
 !include MultiUser.nsh
 !include MUI2.nsh
+!include LogicLib.nsh
 
 ;RequestExecutionLevel user
 InstallDir ""
 
 !insertmacro MUI_PAGE_WELCOME
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW addLicense
 !insertmacro MUI_PAGE_LICENSE "License.rtf"
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
 !insertmacro MUI_PAGE_COMPONENTS
@@ -141,4 +143,41 @@ FunctionEnd
 
 Function LaunchLink
   ExecShell "" "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk"
+FunctionEnd
+
+Function addLicense
+  ;use !echo and DetailPrint -> https://nsis.sourceforge.io/Reference/!echo
+
+  ClearErrors
+
+  ${If} $LANGUAGE == "2052"
+    ;current language is SimpChinese
+    FileOpen $0 "$EXEDIR\licenses\License-SimpChinese.txt" r
+    IfErrors exit
+  ${Else}
+    ;current language is English
+    FileOpen $0 "$EXEDIR\licenses\License-English.txt" r
+    IfErrors exit
+  ${EndIf}
+  ;$R0 is the file content 
+  ;$R1 is the line of content read from the file each time
+  ;$R2 is the file size
+  FileSeek $0 0 END $R2
+  FileSeek $0 0 SET
+  StrCpy $R0 ""
+  ${Do}
+    FILEREADUTF16LE $0 $R1
+    ${If} $R1 == ""
+      ${ExitDo}
+    ${EndIf}
+    StrCpy $R0 $R0$R1
+  ${Loop}
+  FileClose $0
+
+  FindWindow $0 "#32770" "" $HWNDPARENT
+  GetDlgItem $0 $0 1000
+  SendMessage $0 ${EM_SETLIMITTEXT} $R2 0
+  SendMessage $0 ${WM_SETTEXT} 0 "STR:$R0"
+exit:
+ 
 FunctionEnd

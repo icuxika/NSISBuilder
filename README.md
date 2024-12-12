@@ -46,6 +46,10 @@ Set-Content -Path $outputFile -Value $newContent
 & 'C:\Program Files (x86)\NSIS\makensis.exe' /INPUTCHARSET UTF8 .\installer_execute.nsi
 ```
 
+## 注意事项
+- 程序会根据选择的语言读取`licenses`目录下的对应文本文件，由于使用了`FileReadUTF16LE`，所有`licenses`的文本文档都要（在vscode中）通过编码保存为`UTF-16LE`
+- 默认指定的`!insertmacro MUI_PAGE_LICENSE "License.rtf"`会被`addLicense`函数内的逻辑所覆盖，如果不需要多语言版本的设置，单独一个包含中文字符`License.rtf`文件（在vscode中）通过编码保存为`UTF-8 with BOM`就能够避免中文乱码
+
 ## 参考
 - [Sample installation script for an application](https://nsis.sourceforge.io/Sample_installation_script_for_an_application)
 - [Multi-User Header File (MultiUser.nsh)](https://nsis.sourceforge.io/Docs/MultiUser/Readme.html)
